@@ -1,0 +1,18 @@
+
+
+CREATE TABLE `tables` (
+  `id` int(11) NOT NULL,
+  `name` varchar(256) NOT NULL,
+  `columns` BLOB NOT NULL,
+  `records` BLOB NOT NULL,
+  `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+ALTER TABLE `tables`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `tables`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;COMMIT;
+

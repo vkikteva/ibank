@@ -1,0 +1,101 @@
+<html>
+<head>
+
+<?php include "bootstrap_meta.php"; ?>
+
+
+<script>
+
+	function openToEdit(id) {
+		window.location.href = "/data_linker.html?editColumn=" + id;
+	}
+	
+	function csvToArray(csv, delimiter = ",") {
+	  var arr = csv.split(delimiter)
+		  .map(e => e.trim())
+		  .filter(e => {
+			if (e) return true; else return false ;
+		  })
+		  .map(e => parseInt(e));
+	  return arr
+	}
+	
+	function checkBoxChanged(id) {
+		var checkbox = document.getElementById("ch" + id);
+		var tColumns = csvToArray(document.getElementById("colForTable").value);
+		
+		if(tColumns.includes(id)) {
+			if (!checkbox.checked) {
+				tColumns = tColumns.filter(function(value, index, arr) {
+					return value !== id;
+				});
+			}
+		} else {
+			if (checkbox.checked) {
+				tColumns.push(id)
+			}
+		}
+		
+		document.getElementById("colForTable").value = tColumns.join(',');
+		// tColumns.value = "  3  ,  4, 6 ,8 ";
+		
+		
+		// alert(csvToArray(tColumns.value));
+	}
+
+	function openToEdit(id) {
+		window.location.href = "table.html?id=" + id;
+	}
+
+</script>
+
+</head>
+<body>
+
+
+
+<?php include "menu.html"; ?>
+
+
+
+
+
+		<h1>Таблиці:</h1>
+<?php
+
+
+include './db/db_conn.php';
+
+
+$sql = 'SELECT id, name, created, modified FROM tables ORDER BY id';
+echo '<table class="table table-striped table-hover" >';
+echo '<tr><th></th><th>Id</th><th>Назва таблиці</th><th>Створено</th><th>Змінено</th></tr>';
+foreach ($conn->query($sql) as $row) {
+	echo '<tr>';
+	echo '<td><button class="btn btn-info btn-sm" onclick="openToEdit('.$row['id'].')">Переглянути</button></td>';
+    echo '<td>'.$row['id'].'</td>';
+    echo '<td><a href="table.html?id='.$row['id'].'">'.$row['name'].'</td>';
+	echo '<td>'.$row['created'].'</td>';
+    echo '<td>'.$row['modified'].'</td>';
+	echo '</tr>';
+}
+echo '</table>';
+
+
+$conn->close();
+	
+
+
+
+?>
+
+
+
+
+
+
+
+
+</body>
+</html>
+

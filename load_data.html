@@ -1,0 +1,151 @@
+
+<html>
+<head>
+
+<?php include "bootstrap_meta.php"; ?>
+
+</head>
+<body>
+
+
+
+<?php include "menu.html"; ?>
+
+
+
+
+
+<h1>Завантаження...</h1>
+
+
+
+
+
+<?php
+
+$url = $_POST["url"];
+$col_name = $_POST["col"];
+
+$max = 0;
+foreach ($_POST  as $key => $value) {
+	if (strpos($key, 'cell') === 0) {
+		$indx = intval(str_replace('cell', '', $key));
+		if ($indx > $max) {
+			$max = $indx;
+		}
+	}
+}
+
+$html = file_get_contents($url);
+
+$html = str_replace('&', '', $html);
+$html = str_replace("'", "", $html);
+
+
+
+$doc = new DOMDocument();
+
+#set error level
+#$internalErrors = libxml_use_internal_errors(true);
+
+#$doc->loadHTML($html);
+$libxml_previous_state = libxml_use_internal_errors(true);
+$doc->loadHTML($html);
+libxml_use_internal_errors($libxml_previous_state);
+#Restore error level
+#libxml_use_internal_errors($internalErrors);
+
+
+$xpath = new DOMXpath($doc);
+# /html/body/form[1]/section/article/div[4]/div[1]/table[1]/tbody/tr[2]/td[3]
+
+#$node = $xpath->query('/html/body/form[1]/section/article/div[4]/div[1]/table[1]/tbody/tr[2]/td[3]');
+#if ($node->length === 0) {
+#	$node = $xpath->query('/html/body/form[1]/section/article/div[4]/div[1]/table[1]/tr[2]/td[3]');
+#}
+#echo var_dump($node);
+#echo var_dump($node->length);
+#echo var_dump($xpath->query('/html/body/form[1]/section/article/div[4]/div[1]/table[1]/tr[2]/td[3]'));
+
+#echo var_dump($xpath->query('/html/body/form[1]/section/article/div[4]/div[1]/table[1]/tr[2]/td[3]')->length);
+
+/*
+foreach ($xpath->query('/html/body/form[1]/section/article/div[4]/div[1]/table[1]/tr[2]/td[3]') as $textNode) {
+	echo '$$$ fuck';
+	echo $textNode->nodeValue.'<br/>';
+}
+*/
+
+
+
+
+#echo '<br>';
+
+$triage = array($max);
+for ($i = 1; $i <= $max; $i++) {
+	$cell_val = $_POST['cell'.$i];
+	#echo $cell_val.'<br/>';
+	if (is_numeric($cell_val)) {
+		$triage[$i - 1] = intval($cell_val);
+	} else if (!empty($cell_val)) {
+		$node = $xpath->query($cell_val);
+		if ($node->length === 0) {
+			$node = $xpath->query(str_replace('/tbody', '', $cell_val));
+		}
+	
+		foreach ($node as $textNode) {
+			$val = str_replace(' ', '', $textNode->nodeValue);
+			$val = str_replace('&nbsp;', '', $val);
+			$val = str_replace(',', '.', $val);
+			#echo '$$$$$$$$'.$val.'<br/>';
+			$triage[$i - 1] = floatval($val);
+		}
+	}
+}
+#echo var_dump($triage);
+
+include './db/db_conn.php';
+
+$stmt = $conn->stmt_init();
+
+$jsonNumbers = json_encode($triage, JSON_FORCE_OBJECT);
+$jsonParams = json_encode($_POST, JSON_FORCE_OBJECT);
+
+if (isset($_POST["postId"])) {
+	$stmt->prepare('UPDATE columns SET name=?, numbers=?, params=? WHERE id=?');
+	$stmt->bind_param('sssi', $col_name, $jsonNumbers, $jsonParams, $_POST["postId"]);
+} else {
+	$stmt->prepare('INSERT INTO columns (name, numbers, params) VALUES (?, ?, ?)');
+	$stmt->bind_param('sss', $col_name, $jsonNumbers, $jsonParams);
+}
+
+
+
+
+$stmt->execute();
+
+$last_id = $conn->insert_id;
+echo "<h1>Новий стовпець завантажений успішно. Останній ідентифікатор: " . $last_id."</h1>";
+
+$stmt->close();
+$conn->close();
+	
+  #echo 'done <br/>';
+  
+
+
+
+
+
+
+?>
+
+
+
+
+
+
+</body>
+</html>
+
+

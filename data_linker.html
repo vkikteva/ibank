@@ -1,0 +1,186 @@
+
+<html>
+<head>
+
+<?php include "bootstrap_meta.php"; ?>
+
+
+<style>
+input {width:500px}
+</style>
+
+
+
+</head>
+<body>
+
+
+
+
+<?php
+
+include "menu.html";
+
+echo '<form id="linker" action="load_data.html" method="post" >';
+
+
+if (isset($_GET["editColumn"])) {
+
+	include './db/db_conn.php';
+
+	$stmt = $conn->stmt_init();
+	$stmt->prepare('SELECT id, name, params FROM columns WHERE id=?');
+
+	$stmt->bind_param('i', $_GET["editColumn"]);
+	$stmt->execute();
+
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_array(MYSQLI_NUM)) {
+	
+		echo '<div class="form-floating mb-3">';
+		echo '<input type="text" class="form-control" name="col" id="col" value="'.$row[1].'">';
+		echo '<label for="col">Назва стовпця</label>';
+		echo '</div>';
+		
+		$params = json_decode($row[2], JSON_OBJECT_AS_ARRAY);
+		
+		echo '<div class="form-floating mb-3">';
+		echo '<input type="text" class="form-control" name="url" id="url" value="'.$params['url'].'">';
+		echo '<label for="url">Посилання</label>';
+		echo '</div>';
+
+		echo '<input type="hidden" id="postId" name="postId" value="'.$row[0].'">';
+		
+		for ($i = 1; true; $i++) {
+		
+			if (isset($params['cell'.$i])) {
+				echo '<div class="form-floating mb-3">';
+				echo '<input type="text" class="form-control" name="cell'.$i.'" id="cell'.$i.'" value="'.$params['cell'.$i].'">';
+				echo '<label for="cell'.$i.'">Комірка '.$i.'</label>';
+				echo '</div>';
+			} else {
+				break;
+			}
+			
+		}
+
+    }
+
+	$stmt->close();
+	$conn->close();
+
+
+} else {
+	echo '<div class="form-floating mb-3">';
+	echo '<input type="text" class="form-control" id="col" name="col" >';
+	echo '<label for="col">Назва стовпця</label>';
+	echo '</div>';
+	
+	echo '<div class="form-floating mb-3">';
+	echo '<input type="text" class="form-control" id="url" name="url">';
+	echo '<label for="url">Посилання</label>';
+	echo '</div>';
+
+}
+
+echo '</form>';
+
+
+
+?>
+
+
+
+<button onclick="addCell()" class="btn btn-secondary btn-sm" >Додати комірку</button>
+<button onclick="document.forms['linker'].submit()" class="btn btn-primary btn-lg" >Завантажити дані...</button>
+
+<script>
+
+	getCellNum = function(children) {
+		var num = 0;
+		children.forEach(child => {
+			if (child.nodeName === "DIV") {
+				var divChildren = child.childNodes;
+				divChildren.forEach(divChild => {
+					if (divChild.nodeName === "INPUT" && divChild.type === "text" && divChild.name.startsWith("cell")) {
+						var n = parseInt(divChild.name.replace("cell", ""));
+						if (n > num) {
+							num = n;
+						}
+					}
+				})
+			}
+		});
+		return num + 1;
+	};
+
+	function addCell() {
+	
+		var form = document.getElementById("linker");
+		var num = getCellNum(form.childNodes);
+		
+	
+		var input = document.createElement("input");
+        input.type = "text";
+        input.name = "cell" + num;
+        input.id = "cell" + num;
+		input.classList = ["form-control"];
+		
+		var label = document.createElement("label");
+		label.for = input.id;
+		label.textContent = "Комірка " + num;
+		
+		var div = document.createElement("div");
+		div.classList = ["form-floating mb-3"];
+		div.appendChild(input);
+		div.appendChild(label);
+		
+		form.appendChild(div);
+
+	}
+	
+	addCell();
+	//addCell();
+	//addCell();
+	
+	/*function fillToTest() {
+		document.getElementById("url").value = 'http://localhost:81/tst/BOP_m.html';
+		document.getElementById("col").value = 'column_name';
+		document.getElementById("cell1").value = '/html/body/div[2]/div[2]/div/div[22]/span[1]';
+		document.getElementById("cell2").value = '/html/body/div[2]/div[2]/div/div[24]/span';
+		//document.getElementById("cell3").value = '/html/body/div[2]/div[2]/div/div[172]/span';
+		
+	
+	}*/
+	
+	/*function fillToTest() {
+		document.getElementById("url").value = 'https://russian.doingbusiness.org/ru/rankings';
+		document.getElementById("col").value = 'сname';
+		document.getElementById("cell1").value = '/html/body/div[4]/div/div/div/div/div/div[2]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div[4]/table/tbody/tr[1]/td[3]';
+		document.getElementById("cell2").value = '/html/body/div[4]/div/div/div/div/div/div[2]/div[1]/div/div/div/div/div/div/div[2]/div[2]/div[4]/table/tbody/tr[2]/td[3]';
+
+	
+	}*/
+	
+	
+	function fillToTest() {
+		document.getElementById("url").value = 'https://www.heritage.org/index/ranking';
+		document.getElementById("col").value = 'Country Rankings';
+		document.getElementById("cell1").value = '/html/body/form[1]/section/article/div[4]/div[1]/table[1]/tbody/tr[2]/td[3]';
+		document.getElementById("cell2").value = '/html/body/form[1]/section/article/div[4]/div[1]/table[1]/tbody/tr[3]/td[3]';
+
+	
+	}
+	
+	// fillToTest();
+	
+	
+</script>
+
+
+
+
+
+
+</body>
+</html>

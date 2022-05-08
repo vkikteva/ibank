@@ -1,0 +1,82 @@
+<html>
+<head>
+
+<?php include "bootstrap_meta.php"; ?>
+
+</head>
+<body>
+
+
+
+<?php include "menu.html"; ?>
+
+
+
+
+<h1>Створення таблиці...</h1>
+
+
+
+<?php
+
+
+$tableName = $_POST["tableName"];
+$columns = $_POST["columns"];
+
+
+
+$max = 0;
+foreach ($_POST  as $key => $value) {
+	if (strpos($key, 'rec') === 0) {
+		$indx = intval(str_replace('rec', '', $key));
+		if ($indx > $max) {
+			$max = $indx;
+		}
+	}
+}
+
+# echo '$$$ max'.$max;
+
+$recordNames = array($max);
+for ($i = 0; $i <= $max; $i++) {
+	$record_val = $_POST['rec'.$i];
+	$recordNames[$i] = $record_val;
+}
+
+include './db/db_conn.php';
+
+$stmt = $conn->stmt_init();
+
+$jsonRecordNames = json_encode($recordNames, JSON_FORCE_OBJECT);
+$jsonColumns = json_encode($columns, JSON_FORCE_OBJECT);
+
+$stmt->prepare('INSERT INTO tables (name, columns, records) VALUES (?, ?, ?)');
+$stmt->bind_param('sss', $tableName, $jsonColumns, $jsonRecordNames);
+
+
+
+$stmt->execute();
+
+$last_id = $conn->insert_id;
+echo "Таблиця створена успішно. Останній індекс: " . $last_id;
+
+$stmt->close();
+$conn->close();
+
+
+	
+  #echo 'done <br/>';
+
+
+
+?>
+
+
+
+
+
+
+
+</body>
+</html>
+

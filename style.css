@@ -1,0 +1,76 @@
+*{margin:0;padding:0}
+
+body{
+  padding:0 5px 5px 5px;
+  font-size:11pt;
+  font-family:system-ui
+}
+
+h1{font-size:1.1em}
+h2{font-size:1em}
+h3{font-size:0.9em}
+h4{font-size:0.8em}
+
+.frm{border:solid 1px #000000}
+
+.bgh{
+  text-align:center;
+  background-image:url(bgh.jpg);
+  height:30px
+}
+.bgh h2{padding-top:5px}
+.bgh h3{padding-top:6px}
+
+.html{
+  text-align:justify;
+  padding:5px
+}
+.html img{padding:0 5px 5px 0}
+.html p{margin:10px 0}
+.html ul{margin: 0 0 0 20px}
+.html ol{margin: 0 0 0 25px}
+
+#weather_mail_3 .main img.attention {
+  position:absolute;
+  z-index:5;
+  left:2px;
+  top:20px;
+  width:16px;
+  height:16px;
+  background-image: none !important
+}
+
+.menu{height:70px}
+
+.cnt_r{
+  float:right;
+  display:block;
+  overflow:hidden;
+  min-width:250px;
+  margin:5px 0;
+  width:250px
+}
+.cnt_r h3{
+  float:right;
+  padding:2px 5px 1px 0
+}
+
+.cnt_l{
+  float:left;
+  width:100%;
+  margin-right:-251px
+}
+
+.cnt_c{
+  padding:5px 5px 5px 0;
+  margin-right:251px;
+  position:relative
+}
+
+.srch{
+  float:right;
+  height:25px
+}
+#q{width:188px}
+
+.clr{clear:both}
